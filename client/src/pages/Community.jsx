@@ -39,7 +39,7 @@ const Community = () => {
               <div className="flex gap-1 items-center">
                 <p>{creation.likes.length}</p>
                 <Heart
-                  className={`min-w-5 h-5 hover:scale-110 cursor-pointer ${creation.likes.includes(user.id) ? "fill-red-500 text-red-600" : "text-white"}`}
+                  className={`min-w-5 h-5 hover:scale-110 cursor-pointer ${creation.likes.includes(user?.id) ? "fill-red-500 text-red-600" : "text-white"}`}
                 />
               </div>
             </div>

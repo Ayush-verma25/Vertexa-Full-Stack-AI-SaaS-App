@@ -7,7 +7,11 @@ import { SignIn, useUser } from "@clerk/react";
 const Layout = () => {
   const navigate = useNavigate();
   const [sidebar, setSidebar] = useState(false);
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
+
+  if (!isLoaded) {
+    return null;
+  }
 
   return user ? (
     <div className="flex flex-col items-start justify-start h-screen">
@@ -32,7 +36,7 @@ const Layout = () => {
         )}
       </nav>
 
-      <div className="flex-1 w-full flex h-[calc(100vh-64px)]">
+      <div className="relative flex-1 w-full flex h-[calc(100vh-64px)]">
         <Sidebar sidebar={sidebar} setSidebar={setSidebar} />
         <div className="flex-1 bg-[#F4F7FB]">
           <Outlet />

@@ -40,14 +40,16 @@ const WriteArticle = () => {
         <p className="mt-4 text-sm font-medium">Article Length</p>
 
         <div className="mt-3 flex gap-3 flex-wrap sm:max-w-9/11">
-          {articlelength.map((item, index) => (
-            <span
+          {articlelength.map((item) => (
+            <button
+              type="button"
               onClick={() => setSelectedLength(item)}
-              className={`text-xs px-4 py-1 border rounded-full cursor-pointer ${selectedLength.text === item.text ? "bg-orange-50 text-orange-700" : "text-gray-500 border-gray-300"} `}
-              key={index}
+              aria-pressed={selectedLength.length === item.length}
+              className={`text-xs px-4 py-1 border rounded-full cursor-pointer ${selectedLength.length === item.length ? "bg-orange-50 text-orange-700 border-orange-200" : "text-gray-500 border-gray-300"} `}
+              key={item.length}
             >
               {item.text}
-            </span>
+            </button>
           ))}
         </div>
         <br />

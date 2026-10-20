@@ -9,7 +9,10 @@ export const getUserCreations = async (req, res) => {
 
     res.json({ success: true, creations });
   } catch (error) {
-    res.json({ success: false, message: error.message });
+    console.error("Loading user creations failed", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Unable to load your creations." });
   }
 };
 
@@ -20,7 +23,10 @@ export const getPublishedCreations = async (req, res) => {
 
     res.json({ success: true, creations });
   } catch (error) {
-    res.json({ success: false, message: error.message });
+    console.error("Loading published creations failed", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Unable to load community creations." });
   }
 };
 
@@ -64,6 +70,9 @@ export const toggleLikecreations = async (req, res) => {
       message: liked ? "Creation liked." : "Creation unliked.",
     });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    console.error("Toggling creation like failed", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Unable to update the like." });
   }
 };

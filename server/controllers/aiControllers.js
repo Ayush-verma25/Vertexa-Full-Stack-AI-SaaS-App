@@ -23,10 +23,11 @@ export const generateArticle = async (req, res) => {
     ]);
     const maxTokens = lengthTokenCaps.get(Number(req.body?.length));
 
-    if (!prompt || !maxTokens) {
+    if (!prompt || prompt.length > 4000 || !maxTokens) {
       return res.status(400).json({
         success: false,
-        message: "A prompt and a supported article length are required.",
+        message:
+          "A prompt of 4,000 characters or fewer and a supported article length are required.",
       });
     }
 
@@ -34,7 +35,7 @@ export const generateArticle = async (req, res) => {
     const free_usage = req.free_usage;
 
     if (plan !== "premium" && free_usage >= 10) {
-      return res.json({
+      return res.status(429).json({
         success: false,
         message:
           "You have reached your free usage limit, please upgrade your plan to continue using this feature.",
@@ -71,27 +72,32 @@ export const generateArticle = async (req, res) => {
 
     res.json({ success: true, content });
   } catch (error) {
-    console.log(error.message);
-    res.json({ success: false, message: error.message });
+    console.error("Article generation failed", error);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to generate the article right now.",
+    });
   }
 };
 
 export const generateBlogTitle = async (req, res) => {
   try {
     const { userId } = req.auth();
-    const prompt = req.body?.prompt?.trim();
+    const prompt =
+      typeof req.body?.prompt === "string" ? req.body.prompt.trim() : "";
     const plan = req.plan;
     const free_usage = req.free_usage;
 
-    if (!prompt) {
+    if (!prompt || prompt.length > 10000) {
       return res.status(400).json({
         success: false,
-        message: "A keyword and category are required to generate blog titles.",
+        message:
+          "A keyword and category are required (up to 10,000 characters).",
       });
     }
 
     if (plan !== "premium" && free_usage >= 10) {
-      return res.json({
+      return res.status(429).json({
         success: false,
         message:
           "limit reached, please upgrade your plan to continue using this feature.",
@@ -130,19 +136,32 @@ export const generateBlogTitle = async (req, res) => {
 
     res.json({ success: true, content });
   } catch (error) {
-    console.log(error.message);
-    res.json({ success: false, message: error.message });
+    console.error("Blog title generation failed", error);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to generate blog titles right now.",
+    });
   }
 };
 
 export const generateImage = async (req, res) => {
   try {
     const { userId } = req.auth();
-    const { prompt, publish } = req.body;
+    const prompt =
+      typeof req.body?.prompt === "string" ? req.body.prompt.trim() : "";
+    const publish = req.body?.publish ?? false;
     const plan = req.plan;
 
+    if (!prompt || prompt.length > 1000 || typeof publish !== "boolean") {
+      return res.status(400).json({
+        success: false,
+        message:
+          "A prompt of up to 1,000 characters and a valid publish flag are required.",
+      });
+    }
+
     if (plan !== "premium") {
-      return res.json({
+      return res.status(403).json({
         success: false,
         message:
           "This feature is only available for premium subscribers. Please upgrade your plan to continue using this feature.",
@@ -168,8 +187,11 @@ export const generateImage = async (req, res) => {
 
     res.json({ success: true, content: secure_url });
   } catch (error) {
-    console.log(error.message);
-    res.json({ success: false, message: error.message });
+    console.error("Image generation failed", error);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to generate an image right now.",
+    });
   }
 };
 
@@ -188,7 +210,7 @@ export const removeImageBackground = async (req, res) => {
     }
 
     if (plan !== "premium") {
-      return res.json({
+      return res.status(403).json({
         success: false,
         message:
           "This feature is only available for premium subscribers. Please upgrade your plan to continue using this feature.",
@@ -205,8 +227,11 @@ export const removeImageBackground = async (req, res) => {
 
     res.json({ success: true, content: secure_url });
   } catch (error) {
-    console.log(error.message);
-    res.json({ success: false, message: error.message });
+    console.error("Background removal failed", error);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to remove the image background right now.",
+    });
   } finally {
     if (image?.path) {
       await fs.promises.unlink(image.path).catch(() => {});
@@ -241,7 +266,7 @@ export const removeImageObject = async (req, res) => {
     }
 
     if (plan !== "premium") {
-      return res.json({
+      return res.status(403).json({
         success: false,
         message:
           "This feature is only available for premium subscribers. Please upgrade your plan to continue using this feature.",
@@ -260,8 +285,11 @@ export const removeImageObject = async (req, res) => {
 
     res.json({ success: true, content: imageUrl });
   } catch (error) {
-    console.log(error.message);
-    res.json({ success: false, message: error.message });
+    console.error("Object removal failed", error);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to remove the image object right now.",
+    });
   } finally {
     if (image?.path) {
       await fs.promises.unlink(image.path).catch(() => {});
@@ -284,7 +312,7 @@ export const resumeReview = async (req, res) => {
     }
 
     if (plan !== "premium") {
-      return res.json({
+      return res.status(403).json({
         success: false,
         message:
           "This feature is only available for premium subscribers. Please upgrade your plan to continue using this feature.",
@@ -361,8 +389,11 @@ ${truncatedResumeText}${truncationNote}`;
 
     res.json({ success: true, content });
   } catch (error) {
-    console.log(error.message);
-    res.json({ success: false, message: error.message });
+    console.error("Resume review failed", error);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to review the resume right now.",
+    });
   } finally {
     if (resume?.path) {
       await fs.promises.unlink(resume.path).catch(() => {});

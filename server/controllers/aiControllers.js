@@ -6,10 +6,22 @@ import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 import { PDFParse } from "pdf-parse";
 
-const AI = new OpenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
-});
+let AI;
+
+const getAI = () => {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error("GEMINI_API_KEY is not configured.");
+  }
+
+  if (!AI) {
+    AI = new OpenAI({
+      apiKey: process.env.GEMINI_API_KEY,
+      baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
+    });
+  }
+
+  return AI;
+};
 
 export const generateArticle = async (req, res) => {
   try {
@@ -42,7 +54,7 @@ export const generateArticle = async (req, res) => {
       });
     }
 
-    const response = await AI.chat.completions.create({
+    const response = await getAI().chat.completions.create({
       model: "gemini-3.8-flash",
       messages: [
         {
@@ -104,7 +116,7 @@ export const generateBlogTitle = async (req, res) => {
       });
     }
 
-    const response = await AI.chat.completions.create({
+    const response = await getAI().chat.completions.create({
       model: "gemini-3.8-flash",
       messages: [
         {
@@ -365,7 +377,7 @@ Be specific and constructive. If the resume does not provide enough evidence for
 
 ${truncatedResumeText}${truncationNote}`;
 
-    const response = await AI.chat.completions.create({
+    const response = await getAI().chat.completions.create({
       model: "gemini-3.8-flash",
       messages: [
         {

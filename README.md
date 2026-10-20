@@ -41,6 +41,12 @@ Set these in the **Client** project:
 in them. Add the client domain to Clerk's allowed origins and configure the
 Clerk `premium` plan used by the app. Vercel supplies `VERCEL` and `PORT`.
 
+If the API deployment returns a Vercel 500, confirm the API project's root
+directory is `server`, set the API environment variables above for the
+deployment environment, and redeploy. Open the API project's root URL to check
+that the function responds; browser requests from the client also require a
+correct `CLIENT_URL`.
+
 For local development, copy `client/.env.example` to `client/.env` and
 `server/.env.example` to `server/.env`, then replace the placeholder values.
 Start the API with `npm run server` from `server`, and the client with

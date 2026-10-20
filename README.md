@@ -531,5 +531,3 @@ If you found this project useful or interesting, consider giving it a ⭐ on Git
 <div align="center">
 
 Built with ❤️ using React, Express, PostgreSQL and Node.js
-
-</div>

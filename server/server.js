@@ -13,21 +13,22 @@ const allowedOrigins = process.env.CLIENT_URL?.split(",")
 
 await connectCloudinary();
 
-if (process.env.VERCEL && !allowedOrigins?.length) {
-  throw new Error("Set CLIENT_URL to the deployed client origin.");
-}
-
 app.use(
   cors({
-    origin: allowedOrigins?.length ? allowedOrigins : "http://localhost:5173",
+    origin: allowedOrigins?.length
+      ? allowedOrigins
+      : process.env.VERCEL
+        ? false
+        : "http://localhost:5173",
   }),
 );
 app.use(express.json());
-app.use(clerkMiddleware());
 
 app.get("/", (req, res) => {
   res.send("Server is Live!");
 });
+
+app.use(clerkMiddleware());
 
 app.use("/api/ai", aiRoutes);
 app.use("/api/user", userRoutes);

@@ -1,11 +1,9 @@
 import React, { useState } from "react";
 import { Edit, Sparkles } from "lucide-react";
-import axios from "axios";
+import axios from "../lib/api";
 import { useAuth } from "@clerk/react";
 import toast from "react-hot-toast";
 import Markdown from "react-markdown";
-
-axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 
 const WriteArticle = () => {
   const articlelength = [

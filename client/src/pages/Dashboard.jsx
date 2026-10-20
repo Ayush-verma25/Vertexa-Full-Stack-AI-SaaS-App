@@ -2,27 +2,20 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Gem, Sparkles } from "lucide-react";
 import { Show, useAuth, useUser } from "@clerk/react";
 import CreationItem from "../components/CreationItem";
-import axios from "axios";
+import axios from "../lib/api";
 import toast from "react-hot-toast";
 
-axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
-
 const Dashboard = () => {
-  const [creations, setCreations] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState(null);
   const { getToken } = useAuth();
   const { isLoaded, user } = useUser();
+  const loading = !isLoaded || (!!user && dashboardData?.userId !== user.id);
+  const creations =
+    dashboardData?.userId === user?.id ? dashboardData.creations : [];
 
   const getDashboardData = useCallback(async () => {
-    if (!isLoaded) return;
+    if (!isLoaded || !user) return null;
 
-    if (!user) {
-      setCreations([]);
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
     try {
       const token = await getToken();
       const { data } = await axios.get("/api/user/get-user-creations", {
@@ -30,9 +23,13 @@ const Dashboard = () => {
       });
 
       if (data.success) {
-        setCreations(data.creations ?? []);
+        return {
+          userId: user.id,
+          creations: data.creations ?? [],
+        };
       } else {
         toast.error(data.message || "Unable to load your creations.");
+        return { userId: user.id, creations: [] };
       }
     } catch (error) {
       toast.error(
@@ -40,13 +37,19 @@ const Dashboard = () => {
           error.message ||
           "Unable to load your creations.",
       );
-    } finally {
-      setLoading(false);
+      return { userId: user.id, creations: [] };
     }
   }, [getToken, isLoaded, user]);
 
   useEffect(() => {
-    void getDashboardData();
+    let active = true;
+    void getDashboardData().then((data) => {
+      if (active && data) setDashboardData(data);
+    });
+
+    return () => {
+      active = false;
+    };
   }, [getDashboardData]);
 
   return (

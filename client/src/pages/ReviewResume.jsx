@@ -1,11 +1,9 @@
 import React, { useState } from "react";
 import { FileText, Sparkles } from "lucide-react";
-import axios from "axios";
+import axios from "../lib/api";
 import { useAuth } from "@clerk/react";
 import toast from "react-hot-toast";
 import Markdown from "react-markdown";
-
-axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 
 const ReviewResume = () => {
   const [input, setInput] = useState(null);
@@ -28,8 +26,8 @@ const ReviewResume = () => {
       return;
     }
 
-    if (input.size > 5 * 1024 * 1024) {
-      toast.error("Resume file size exceeds the 5 MB limit.");
+    if (input.size > 4 * 1024 * 1024) {
+      toast.error("Resume file size exceeds the 4 MB limit.");
       return;
     }
 
@@ -88,7 +86,7 @@ const ReviewResume = () => {
         />
 
         <p className="text-xs text-gray-500 font-light mt-1">
-          Supports PDF resumes only.
+          Supports PDF resumes up to 4 MB.
         </p>
 
         <button

@@ -4,24 +4,32 @@ import { clerkClient } from "@clerk/express";
 export const auth = async (req, res, next) => {
   try {
     const { userId, has } = await req.auth();
-    const hasPremiumPlan = await has({ plan: "premium" });
-
-    const user = await clerkClient.users.getUser(userId);
-
-    if (!hasPremiumPlan && user.privateMetadata.free_usage) {
-      req.free_usage = user.privateMetadata.free_usage;
-    } else {
-      await clerkClient.users.updateUserMetadata(userId, {
-        privateMetadata: {
-          free_usage: 0,
-        },
-      });
-      req.free_usage = 0;
+    if (!userId) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Authentication is required." });
     }
 
+    const hasPremiumPlan = await has({ plan: "premium" });
+    const user = await clerkClient.users.getUser(userId);
+    const storedFreeUsage = user.privateMetadata?.free_usage;
+    const freeUsage = Number(storedFreeUsage) || 0;
+
+    if (!hasPremiumPlan && storedFreeUsage !== freeUsage) {
+      await clerkClient.users.updateUserMetadata(userId, {
+        privateMetadata: {
+          free_usage: freeUsage,
+        },
+      });
+    }
+
+    req.free_usage = freeUsage;
     req.plan = hasPremiumPlan ? "premium" : "free";
-    next();
+    return next();
   } catch (error) {
-    res.json({ success: false, message: error.message });
+    console.error("Authentication middleware failed", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Unable to verify your account." });
   }
 };

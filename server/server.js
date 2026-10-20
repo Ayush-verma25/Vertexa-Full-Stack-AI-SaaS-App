@@ -7,19 +7,19 @@ import connectCloudinary from "./configs/cloudinary.js";
 import userRoutes from "./routes/userRoutes.js";
 
 const app = express();
-const allowedOrigins = process.env.CLIENT_URL?.split(",")
-  .map((origin) => origin.trim())
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://vertexa-ai-frontend.onrender.com",
+  ...(process.env.CLIENT_URL?.split(",") ?? []),
+]
+  .map((origin) => origin.trim().replace(/\/+$/, ""))
   .filter(Boolean);
 
 await connectCloudinary();
 
 app.use(
   cors({
-    origin: allowedOrigins?.length
-      ? allowedOrigins
-      : process.env.VERCEL
-        ? false
-        : "http://localhost:5173",
+    origin: allowedOrigins,
   }),
 );
 app.use(express.json());
